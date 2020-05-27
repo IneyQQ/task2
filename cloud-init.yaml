@@ -1,0 +1,32 @@
+#cloud-config
+# -*- YAML -*-
+package_update: true
+locale: en_US.UTF-8
+packages:
+  - git
+users:
+  - default
+  - name: project1
+    sudo: ALL=(ALL) ALL
+    passwd: $6$rounds=4096$WD2xfaPvRp1DAFT$AazHWB9SkrNlltRQJ08hsF0kQIXLsXKp2KX233SWN4hNiWcseO/47xhn9iaS/09SxRQHBAmgw3V079Aa6mszS1
+    lock_passwd: false
+    homedir: /home/project1-home
+    ssh-authorized-keys:
+    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC4LQQcR8z2lmLV/bjnU22ZRnVZewAnnoMB70IIMKQBepb1b2MEUOLMFDmZqx0Vkm58/yN/U3qBTkaID6sGZg2vdbREi4/q4iuMtjrj8FwWYOB4FPdJHRCsY3yGwZZGoBpyj0gO8/mYkkco55W2SArB4egQ87Fz3oFqZkIvYPzYSpNWkVsofc7FOvuN4fZZPqdUcw6mQpYZVCmAYrxLTS1CPmtZLlfQcIWZPuxDVYz5onraMXDkhzOLlE2rpzngVqKJRw6sg/dk+DoIxsVsqqsnrbOWTyP7XPOJTPYBa72E6rHDhwMLg+cXfxVIzEnxJt8MlvY2msNk0INLGOzwFp8/
+write_files:
+  - content: |
+      [Service]
+      User=project1
+      ExecStart=/bin/bash /home/project1/code/project.sh /home/project1/generated_data
+      SyslogIdentifier=task-project
+    path: /etc/systemd/system/task-project.service
+  - content: |
+      if $programname == 'task-project' then /var/log/task-project
+    path: /etc/rsyslog.d/task-project.conf
+runcmd:
+  - |
+    cd /home/
+    git clone https://github.com/IneyQQ/task2 project1
+    chown project1:project1 -R project1
+    systemctl enable task-project.service
+    systemctl start  task-project.service
